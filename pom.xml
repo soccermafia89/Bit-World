@@ -9,7 +9,7 @@
     
     <scm>
         <connection>scm:git:ssh://git@github.com:soccermafia89/Bit-World.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:soccermafia89/Bit-World.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/soccermafia89/Bit-World.git</developerConnection>
         <url>https://github.com/soccermafia89/Bit-World</url>
         <tag>bit-world-1.0.0</tag>
     </scm>
