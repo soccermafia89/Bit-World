@@ -5,9 +5,16 @@
     <groupId>ethier.alex</groupId>
     <artifactId>bit-world</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>Bit World</name>
-    <url>http://maven.apache.org</url>
+    
+    <scm>
+        <connection>scm:git:ssh://git@github.com:soccermafia89/Bit-World.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:soccermafia89/Bit-World.git</developerConnection>
+        <url>https://github.com/soccermafia89/Bit-World</url>
+        <tag>bit-world-1.0.0</tag>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
