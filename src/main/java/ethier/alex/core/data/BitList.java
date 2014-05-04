@@ -4,6 +4,9 @@
  */
 package ethier.alex.core.data;
 
+import java.util.Arrays;
+import org.apache.log4j.Logger;
+
 /**
 
  @author alex
@@ -12,16 +15,19 @@ package ethier.alex.core.data;
 //Wrap Bit[] in a java type.
 public class BitList {
     
+    private static Logger logger = Logger.getLogger(BitList.class);
+    
     private Bit[] combination;
     private int splitIndex = -1; //-1 is synonymous with N/A.
     
     public BitList(Bit[] myCombination) {
+        
         combination = myCombination;
         
         for(int i=0; i < combination.length;i++) {
                 
             Bit bit = combination[i];
-            if(bit == Bit.UNSET) {
+            if(splitIndex < 0 && bit == Bit.UNSET) {
                 splitIndex = i;
             }
         }
@@ -32,7 +38,7 @@ public class BitList {
     }
     
     public boolean hasSplit() {
-        if(splitIndex > 0) {
+        if(splitIndex > -1) {
             return true;
         } else {
             return false;
@@ -43,13 +49,13 @@ public class BitList {
         return splitIndex;
     }
     
-    public BitList[] split() {
-        Bit[] splitOne = new Bit[combination.length];
-        Bit[] splitZero = new Bit[combination.length];
+    public BitList[] getSplits() {
+        Bit[] splitOne = Arrays.copyOf(combination, combination.length);
+        Bit[] splitZero = Arrays.copyOf(combination, combination.length);
 
         splitOne[splitIndex] = Bit.ONE;
         splitZero[splitIndex] = Bit.ZERO;
-
+        
         BitList bitListOne = new BitList(splitOne);
         BitList bitListZero = new BitList(splitZero);
 
@@ -60,15 +66,17 @@ public class BitList {
         return bitLists;     
     }
     
-    
-    
     public Matches getMatch(BitList otherList) {
+        return getMatch(otherList, 0);
+    }
+    
+    public Matches getMatch(BitList otherList, int splitIndex) {
         
         boolean possibleMatch = false;
         
         Bit[] otherCombination = otherList.getBitArray();
         
-        for(int i=0; i < combination.length;i++) {
+        for(int i=splitIndex; i < combination.length;i++) {
             Bit bit = combination[i];
             Bit otherBit = otherCombination[i];
             
@@ -93,5 +101,32 @@ public class BitList {
         } else {
             return Matches.ENTIRELY;
         }        
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        
+        for(Bit bit : combination) {
+            switch(bit) {
+                case BOTH: 
+                    stringBuilder.append('*');
+                    break;
+                
+                case UNSET: 
+                    stringBuilder.append('-');
+                    break;
+                    
+                case ONE: 
+                    stringBuilder.append("1");
+                    break;
+                    
+                case ZERO: 
+                    stringBuilder.append("0");
+                    break;
+            }
+        }
+        
+        return stringBuilder.toString();
     }
 }

@@ -6,10 +6,12 @@ package ethier.alex.core.processor;
 
 import ethier.alex.core.data.Bit;
 import ethier.alex.core.data.BitList;
+import ethier.alex.core.data.Matches;
 import ethier.alex.core.data.Partition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import org.apache.log4j.Logger;
 
 /**
 
@@ -17,13 +19,18 @@ import java.util.Iterator;
  */
 public class SimpleProcessor {
     
+    private static Logger logger = Logger.getLogger(SimpleProcessor.class);
+    
     private Collection<Partition> incompletePartitions;
-    private Collection<Partition> completePartitions;
+    private Collection<BitList> finalCombinations;
     
     public SimpleProcessor(Collection<Partition> myPartitions) {
         incompletePartitions = myPartitions;
-        completePartitions = new ArrayList<Partition>();
-        
+        finalCombinations = new ArrayList<BitList>();   
+    }
+    
+    public Collection<BitList> getCompletedPartitions() {
+        return finalCombinations;
     }
     
     public void runAll() {
@@ -32,38 +39,42 @@ public class SimpleProcessor {
         }
     }
     
-    public void runSet() {
+    public void runSet() {        
+        logger.debug("Processing " + incompletePartitions.size() + " partitions");
         Collection<Partition> newPartitionSet = new ArrayList<Partition>();
-        
+                
         Iterator<Partition> it = incompletePartitions.iterator();
         while(it.hasNext()) {
             Partition partition = it.next();
             if(partition.getCombination().hasSplit()) {
                 Collection<Partition> splitPartitions = this.splitPartition(partition);
-                newPartitionSet.add(partition);
+                newPartitionSet.addAll(splitPartitions);
             } else {
-                completePartitions.add(partition);
+                finalCombinations.add(partition.getCombination());
             }
             
             it.remove();
         }
         
+        logger.debug(newPartitionSet.size() + " new incomplete partitions created.");
         incompletePartitions = newPartitionSet;
     }
     
     public Collection<Partition> splitPartition(Partition partition) {
+        logger.debug("Splitting partition with combination: " + partition.getCombination());
+        
         Collection<Partition> newPartitions = new ArrayList<Partition>();
         
         BitList combination = partition.getCombination();
         
-        BitList[] bitLists = combination.split();
+        BitList[] bitLists = combination.getSplits();
 
         BitList zeroList = bitLists[0];
         BitList oneList = bitLists[1];
 
         Collection<BitList> filters = partition.getFilters();
         int splitIndex = combination.getSplitIndex();
-
+        
         Collection<BitList> zeroFilters = new ArrayList<BitList>();
         Collection<BitList> oneFilters = new ArrayList<BitList>();
 
@@ -82,17 +93,47 @@ public class SimpleProcessor {
         // In the special case that all filters contain a '*' then we don't need to return two splits.
         if(zeroFilters.size() == oneFilters.size()) {
             zeroList.getBitArray()[splitIndex] = Bit.BOTH;
-            Partition bothPartiton = new Partition(zeroList, zeroFilters);
-            newPartitions.add(bothPartiton);
+            Partition bothPartition = new Partition(zeroList, zeroFilters);
+            
+            if(!matchExists(bothPartition, splitIndex)) {
+                newPartitions.add(bothPartition);
+            }
 
         } else {
+            
             Partition zeroPartition = new Partition(zeroList, zeroFilters);
             Partition onePartition = new Partition(oneList, oneFilters);
-            newPartitions.add(zeroPartition);
-            newPartitions.add(onePartition);
+            
+            if(!matchExists(zeroPartition, splitIndex)) {
+                newPartitions.add(zeroPartition);
+            }
+            
+            if(!matchExists(onePartition, splitIndex)) {
+                newPartitions.add(onePartition);
+            }
         }
+        
+//        for(Partition newPartition : newPartitions) {
+//            if(newPartition.verifyIntegrity() == false) {
+//                logger.error("Integrity not maintained for partition: "  + newPartition.getCombination());
+//            }
+//        }
 
         return newPartitions;
     }
     
+    private boolean matchExists(Partition partition, int splitIndex) {
+        
+        BitList combination = partition.getCombination();
+        
+        for(BitList filter : partition.getFilters()) {
+            Matches matchOutcome = combination.getMatch(filter);
+            
+            if(matchOutcome == Matches.ENTIRELY) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }

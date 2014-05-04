@@ -16,41 +16,38 @@ import org.apache.log4j.Logger;
  */
 
 //Should be made into a static helper type method since it is not required to save state.
-public class StringFilter {
+public class BitListBuilder {
     
-    private static Logger logger = Logger.getLogger(StringFilter.class);
-    private BitList combination;
+    private static Logger logger = Logger.getLogger(BitListBuilder.class);
     
-    public StringFilter(String inputStr) {
+    public static BitList buildBitList(String inputStr) {
         String cleansedInput = cleanseInput(inputStr);
         char[] inputChars = cleansedInput.toCharArray();
         
-        Bit[] filterBits = new Bit[inputChars.length];
+        Bit[] bitList = new Bit[inputChars.length];
         
-        for(int i=0;i < filterBits.length;i++) {
+        for(int i=0;i < bitList.length;i++) {
             if(inputChars[i] == '0') {
-                filterBits[i] = Bit.ZERO;
+                bitList[i] = Bit.ZERO;
             } else if(inputChars[i] == '1' ) {
-                filterBits[i] = Bit.ONE;
+                bitList[i] = Bit.ONE;
             } else if(inputChars[i] == '*') {
-                filterBits[i] = Bit.BOTH;
+                bitList[i] = Bit.BOTH;
+            } else if(inputChars[i] == '-') {
+                bitList[i] = Bit.UNSET;
             } else {
                 logger.error("Unknown filter input char received: " + inputChars[i]);
             }
         }
         
-        combination = new BitList(filterBits);
-    }
-    
-    public BitList getCombination() {
-        return combination;
+        return new BitList(bitList);
     }
         
-    private String cleanseInput(String input) {
+    private static String cleanseInput(String input) {
         StringBuilder cleansedInputBuilder = new StringBuilder();
         
         for(char inputChar : input.toCharArray()) {
-            if(inputChar == '0' || inputChar == '1' || inputChar == '*') {
+            if(inputChar == '0' || inputChar == '1' || inputChar == '*' || inputChar == '-') {
                 cleansedInputBuilder.append(inputChar);
             }
         }

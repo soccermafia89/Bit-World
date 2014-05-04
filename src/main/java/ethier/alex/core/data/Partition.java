@@ -41,4 +41,15 @@ public class Partition {
     public Collection<BitList> getFilters() {
         return filters;
     }
+    
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Combination: " + combination.toString() + "\n");
+        stringBuilder.append("Filters: \n");
+        for(BitList filter : filters) {
+            stringBuilder.append(filter.toString() + "\n");
+        }
+        
+        return stringBuilder.toString();
+    }
 }
