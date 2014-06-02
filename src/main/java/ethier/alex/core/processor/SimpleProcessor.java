@@ -24,6 +24,12 @@ public class SimpleProcessor {
     private Collection<Partition> incompletePartitions;
     private Collection<BitList> finalCombinations;
     
+    public SimpleProcessor(Partition myPartition) {
+        incompletePartitions = new ArrayList<Partition>();
+        incompletePartitions.add(myPartition);
+        finalCombinations = new ArrayList<BitList>();
+    }
+    
     public SimpleProcessor(Collection<Partition> myPartitions) {
         incompletePartitions = myPartitions;
         finalCombinations = new ArrayList<BitList>();   
@@ -78,6 +84,7 @@ public class SimpleProcessor {
         Collection<BitList> zeroFilters = new ArrayList<BitList>();
         Collection<BitList> oneFilters = new ArrayList<BitList>();
 
+        boolean allBothFilters = true;
         for(BitList filter : filters) {
             Bit filterBit = filter.getBitArray()[splitIndex];
             if(filterBit == Bit.BOTH) {
@@ -85,13 +92,15 @@ public class SimpleProcessor {
                 oneFilters.add(filter);
             } else if(filterBit == Bit.ZERO) {
                 zeroFilters.add(filter);
+                allBothFilters = false;
             } else if(filterBit == Bit.ONE) {
                 oneFilters.add(filter);
+                allBothFilters = false;
             }
         }
 
         // In the special case that all filters contain a '*' then we don't need to return two splits.
-        if(zeroFilters.size() == oneFilters.size()) {
+        if(allBothFilters) {
             zeroList.getBitArray()[splitIndex] = Bit.BOTH;
             Partition bothPartition = new Partition(zeroList, zeroFilters);
             
@@ -113,11 +122,13 @@ public class SimpleProcessor {
             }
         }
         
-//        for(Partition newPartition : newPartitions) {
-//            if(newPartition.verifyIntegrity() == false) {
-//                logger.error("Integrity not maintained for partition: "  + newPartition.getCombination());
-//            }
-//        }
+        for(Partition newPartition : newPartitions) {
+            if(newPartition.verifyIntegrity() == false) {
+                logger.error("Integrity not maintained for partition: "  + newPartition.getCombination());
+            } else {
+                logger.debug("New Partition: " + newPartition.getCombination());
+            }
+        }
 
         return newPartitions;
     }
