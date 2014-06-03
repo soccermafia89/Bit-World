@@ -104,7 +104,7 @@ public class SimpleProcessor {
             zeroList.getBitArray()[splitIndex] = Bit.BOTH;
             Partition bothPartition = new Partition(zeroList, zeroFilters);
             
-            if(!matchExists(bothPartition, splitIndex)) {
+            if(!matchExists(bothPartition)) {
                 newPartitions.add(bothPartition);
             }
 
@@ -113,11 +113,11 @@ public class SimpleProcessor {
             Partition zeroPartition = new Partition(zeroList, zeroFilters);
             Partition onePartition = new Partition(oneList, oneFilters);
             
-            if(!matchExists(zeroPartition, splitIndex)) {
+            if(!matchExists(zeroPartition)) {
                 newPartitions.add(zeroPartition);
             }
             
-            if(!matchExists(onePartition, splitIndex)) {
+            if(!matchExists(onePartition)) {
                 newPartitions.add(onePartition);
             }
         }
@@ -133,7 +133,7 @@ public class SimpleProcessor {
         return newPartitions;
     }
     
-    private boolean matchExists(Partition partition, int splitIndex) {
+    private boolean matchExists(Partition partition) {
         
         BitList combination = partition.getCombination();
         
